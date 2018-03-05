@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="nav">
+        <ul>
+            <li id="homeNav">Home</li>
+            <li id="userNav">USERNAME</li>
+            <li id="logoutNav">Déconnexion</li>
+        </ul>
+    </div>
+    <div class="content"></div>
+    <script>
+        var navDiv = document.querySelector('.nav');
+
+        if (sessionStorage.getItem('user') == undefined) {
+            navDiv.style.display = "none";
+            initPage('login');
+        } else {
+            navDiv.style.display = "block";
+            initPage('profile');
+        }
+        homeNav.onclick = function () {
+            initPage('home');
+        }
+        userNav.onclick = function () {
+            initPage('profile');
+        }
+        logoutNav.onclick = function () {
+            initPage('login');
+        }
+
+        function initPage(url) {
+            var request = new XMLHttpRequest();
+            request.open('GET', url + '.html', true);
+
+            request.onload = function () {
+                if (request.status >= 200 && request.status < 400) {
+                    var contentDiv = document.querySelector('.content');
+                    contentDiv.innerHTML = request.responseText;
+
+                    if (url == 'home') {
+                        var homeTitle = document.querySelector('.homeTitle');
+                        homeTitle.innerHTML += " " + sessionStorage.getItem('user');
+                    } else if (url == 'profile') {
+                        var usernameDiv = document.querySelector('.usernameDiv');
+                        var usernameInput = document.querySelector('input[name="username"]');
+
+                        usernameInput.value = sessionStorage.getItem('user');
+
+                        usernameInput.onkeyup = function () {
+                            sessionStorage.removeItem('user');
+                            sessionStorage.setItem('user', this.value);
+                            userNav.innerHTML = sessionStorage.getItem('user');
+                        }
+                    } else if (url == 'login') {
+                        sessionStorage.removeItem('user');
+                        navDiv.style.display = "none";
+                    }
+
+                    if (sessionStorage.getItem('user') == undefined) {
+                        var loginForm = document.querySelector('.loginForm');
+                        loginForm.onsubmit = function () {
+                            var username = document.querySelector('input[name="username"]');
+                            sessionStorage.setItem('user', username.value);
+                            navDiv.style.display = "block";
+                            initPage('home');
+                            return false;
+                        }
+                    } else {
+                        var userNav = document.querySelector('#userNav');
+                        userNav.innerHTML = sessionStorage.getItem('user');
+                    }
+                } else {
+                    alert('ERROR');
+                }
+            };
+
+            request.onerror = function () {
+                alert('ERROR');
+            };
+
+            request.send();
+        }
+    </script>
+</body>
+
+</html>
